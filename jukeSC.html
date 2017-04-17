@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://use.fontawesome.com/144ed3a5c7.js"></script>
+    <script src="https://connect.soundcloud.com/sdk/sdk-3.1.2.js"></script>
+    <link rel="stylesheet" href="./juke.css">
+    <title>Hamilton_Workshop: Jukebox Starter Kit</title>
+  </head>
+  <body>
+    <div id="container">
+      <nav id="playlistNav">
+        <ol type="1" id="sc_list">
+        </ol>
+      </nav>
+      <div id="juke">
+        <img class="art" src="">
+      </div>
+      <footer>
+        <div id="jukeNav">
+          <span id="scSpan" class="inputHolder">
+            <input id="addSC" type="url" class="file">
+            <input id="sc" type="button" class="file btn" value="Add Sound Cloud Link">
+          </span>
+          <a href="#" id="back"><i class="fa fa-step-backward fa-5x" aria-hidden="true"></i></a>
+          <a href="#" id="pause"><i class="fa fa-pause fa-5x" aria-hidden="true"></i></a>
+          <a href="#" id="play"><i class="fa fa-play fa-5x" aria-hidden="true"></i></a>
+          <a href="#" id="stop"><i class="fa fa-stop fa-5x" aria-hidden="true"></i></a>
+          <a href="#" id="forth"><i class="fa fa-step-forward fa-5x" aria-hidden="true"></i></a>
+          <span id="fileSpan" class="inputHolder">
+            <input id="addFile" type="text" class="file" placeholder="full path '/dir/file format' comma separated list">
+            <input id="file" type="button" class="file btn" value="Load New Song">
+          </span>
+        </div>
+      </footer>
+    </div>
+    <script type="text/javascript" src="./jukeboxSC.js"></script>
+  </body>
+</html>
