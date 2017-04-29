@@ -19,9 +19,14 @@ var stopButton = document.querySelector("#stop");
 
 // defines the Jukebox object
 function Jukebox(songs) {
+  /*  Will be used to initiate audio file calls.
+  Will also be used to identify element ID and Class */
   this.songs=songs;
+  // All audio files and Sound Cloud tracks will be available via playlist
   this.playlist=[];
+  // scPlayer will be used to initiate calls to the Sound Cloud API
   this.scPlayer;
+    // Dynamically build html playlist
     for (var counter=0; counter<songs.length; counter++){
       var song="song"+counter;
       var e=document.createElement("audio");
@@ -36,8 +41,10 @@ function Jukebox(songs) {
   console.log(this.playlist.length);
 }
 
+//  Create a new Jukebox object
 var jukebox = new Jukebox([]);
 
+//  Used to add audio files to playlist
 Jukebox.prototype.Addsongs=function(songs){
   this.songs=songs;
   var current=this.playlist.length;
@@ -64,11 +71,14 @@ Jukebox.prototype.Addsongs=function(songs){
   console.log(this.playlist.length);
 }
 
+//  Load three sample audio files to newly created Jukebox object
 jukebox.Addsongs(["./audio/Always\ In\ My\ Head.m4a",
 "./audio/Doubt.m4a","./audio/You\ and\ Me.m4a"]);
 
+//  Used to add Sound Cloud tracks to playlist
 Jukebox.prototype.addSC=function(scurl){
 	this.scurl=scurl;
+  // Define variables that will be used in Resolve and Get request
   var playlist=this.playlist
 	var scID;
 	var scTitle;
@@ -79,6 +89,7 @@ Jukebox.prototype.addSC=function(scurl){
   var scDesc;
   var scGenre;
   var scArt;
+  //  Resolve the Sound Cloud url that was passed as parameter
 	SC.resolve(this.scurl).then(function(response){
 		scID="/tracks/"+response.id;
 		scTitle=response.title;
@@ -91,6 +102,9 @@ Jukebox.prototype.addSC=function(scurl){
     scGenre=response.genre;
     scArt=response.artwork_url;
 	})
+  /*  Timeout needed to allow then() to finish returning attributes.
+  Set local vars to be used globally in Jukebox instance.
+  Dynamically create html elements for playlist*/
 	setTimeout(function(){
   	this.scID=[scID];
   	this.scTitle=[scTitle];
@@ -132,13 +146,14 @@ Jukebox.prototype.addSC=function(scurl){
 	},3000);
 }
 
-//  Function to attach to dynamically created Event Listner for class- details <p>
+//  Function to attach to dynamically created Event Listener for class- details <p>
 var showScDetails=function(event){
   event.preventDefault();
 	console.log(event);
   jukebox.DisplayDetails(event.target.id+"P", event.target.id);
 }
 
+//  Display Sound Cloud details.
 Jukebox.prototype.DisplayDetails=function(paraID, scID){
   eP=document.getElementById(paraID);
   console.log("This is eP- "+eP);
@@ -158,9 +173,10 @@ Jukebox.prototype.DisplayDetails=function(paraID, scID){
   },1000);
 }
 
-//  Load a Sound Cloud song into Jukebox.
+//  Load a Sound Cloud sample song into created Jukebox instance.
 jukebox.addSC("https://soundcloud.com/kjun/keisha-cole-heaven-sent-k-jun-remix");
 
+//  Load the created sample playlist on page load and play first song.
 Jukebox.prototype.onLoad=function(){
   this.song=this.playlist[0];
   this.song.play();
@@ -206,7 +222,6 @@ function choosePlayer(song, action){
   }
 }
 
-//defines the Jukebox prototype object
 Jukebox.prototype.play = function(){
   if (this.song!="undefined"){
     var currentID=(this.song.className.replace(/song/,""));
@@ -233,7 +248,7 @@ Jukebox.prototype.back=function(){
   var currentID=(this.song.className.replace(/song/,""));
   var newID=Number(currentID)-1;
   console.log("song- "+ this.song.id +"\ncurrentID- "+ currentID +"\nnewID- "+ newID +"\nclassID- "+ this.song.className);
-  //test that new counter not  negative (before first song).
+  //  test that new counter not  negative (before first song).
   if (newID>=0){
     choosePlayer(this.song, "back");
     var songID=this.playlist[newID].id;
@@ -260,7 +275,7 @@ Jukebox.prototype.forth=function(){
   var newID=Number(currentID)+1;
   var end=this.playlist.length;
   console.log("song- "+ this.song.id +"\nend- "+ end +"\ncurrentID- "+ currentID +"\nnewID- "+ newID +"\nclassID- "+ this.song.className);
-  //test that new counter not past last playlst item.
+  //  test that new counter not past last playlst item.
   if (newID<end){
     choosePlayer(this.song, "forth");
     var songID=this.playlist[newID].id;
@@ -315,30 +330,29 @@ forthButton.addEventListener("click", function(event){
   jukebox.forth();
 })
 
+//  Button used by end user to add audio files to playlist
 fileButton.addEventListener("click", function(event){
   // prevents link from going to the next page
   event.preventDefault();
 	console.log(event.target);
+  /*  Field used by end user to designate audio files to add to playlist.
+  Files MUST be located in '/audio' folder. */
 	this.songs=[addFileField.value];
 	jukebox.Addsongs(this.songs);
 	addFileField.value="";
 })
 
+//  Button used by end user to add Sound Cloud tracks to playlist
 scButton.addEventListener("click", function(event){
   // prevents link from going to the next page
   event.preventDefault();
 	console.log(event.target);
+  /*  Field used by end user to designate Sound Cloud tracks to add to playlist.*/
 	this.scurl=addSCField.value;
   console.log("scurl- "+ addSCField.value)
 	jukebox.addSC(this.scurl);
 	addSCField.value="";
 })
 
-// playSC.addEventListener("click", function(event){
-//   // prevents link from going to the next page
-//   event.preventDefault();
-// 	console.log(event.target);
-// 	console.log(event.target.innerHTML);
-// })
-
+//  Load and start the new Jukebox instance.
 jukebox.onLoad();
