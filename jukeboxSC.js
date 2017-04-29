@@ -17,13 +17,11 @@ var playButton = document.querySelector("#play");
 var pauseButton = document.querySelector("#pause");
 var stopButton = document.querySelector("#stop");
 
-// var scPlayer, result;
-
 // defines the Jukebox object
 function Jukebox(songs) {
   this.songs=songs;
   this.playlist=[];
-  this.trackList=[];
+  this.scPlayer;
     for (var counter=0; counter<songs.length; counter++){
       var song="song"+counter;
       var e=document.createElement("audio");
@@ -74,6 +72,7 @@ Jukebox.prototype.addSC=function(scurl){
   var playlist=this.playlist
 	var scID;
 	var scTitle;
+  var scPerm;
   var scRelMo;
   var scRelDay;
   var scRelYr;
@@ -84,7 +83,7 @@ Jukebox.prototype.addSC=function(scurl){
 		scID="/tracks/"+response.id;
 		scTitle=response.title;
 		scUser=response.username;
-		scArt=response.artwork_url;
+		scPerm=response.permalink_url;
     scRelMo=response.release_month
     scRelDay=response.release_day
     scRelYr=response.release_year
@@ -95,6 +94,7 @@ Jukebox.prototype.addSC=function(scurl){
 	setTimeout(function(){
   	this.scID=[scID];
   	this.scTitle=[scTitle];
+    this.scPerm=[scPerm];
     this.scRelease=scRelMo +"/"+
       scRelDay +"/"+
       scRelYr;
@@ -108,7 +108,7 @@ Jukebox.prototype.addSC=function(scurl){
     var scClass="song"+Number(playlist.length);
     eA.setAttribute("id", this.scID);
     eA.setAttribute("class", scClass);
-    eA.setAttribute("href", "#");
+    eA.setAttribute("href", this.scPerm);
     eA.innerHTML=this.scTitle;
     e.appendChild(eA);
     playlist.push(eA);
@@ -147,6 +147,7 @@ Jukebox.prototype.DisplayDetails=function(paraID, scID){
   var scArt;
   SC.get(scID).then(function(response){
     scID="/tracks/"+response.id;
+    scPerm=response.permalink_url;
     scArt=response.artwork_url;
   })
   setTimeout(function(){
