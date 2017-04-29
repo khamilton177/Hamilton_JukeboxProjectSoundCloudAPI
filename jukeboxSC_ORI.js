@@ -17,7 +17,7 @@ var playButton = document.querySelector("#play");
 var pauseButton = document.querySelector("#pause");
 var stopButton = document.querySelector("#stop");
 
-// var scPlayer, result;
+var scPlayer, result;
 
 // defines the Jukebox object
 function Jukebox(songs) {
@@ -188,20 +188,23 @@ function choosePlayer(song, action){
   }
   else{
     console.log("Im at SCplayer commands");
+    SC.stream(this.song.id).then(function(player){
+      scPlayer=player;
       switch(eval(action)) {
         case play:
           console.log("At Play");
-          this.scPlayer.play();
+          scPlayer.play();
           break;
         case pause:
           console.log("At Pause");
-          this.scPlayer.pause();
+          scPlayer.pause();
           break;
         default:
           console.log("At Default");
-          this.scPlayer.pause();
-          this.scPlayer.seek(0);
+          scPlayer.pause();
+          scPlayer.seek(0);
       }
+    });
   }
 }
 
@@ -228,7 +231,6 @@ Jukebox.prototype.stop= function () {
 }
 
 Jukebox.prototype.back=function(){
-  var scPlayer;
   var currentID=(this.song.className.replace(/song/,""));
   var newID=Number(currentID)-1;
   console.log("song- "+ this.song.id +"\ncurrentID- "+ currentID +"\nnewID- "+ newID +"\nclassID- "+ this.song.className);
@@ -242,19 +244,17 @@ Jukebox.prototype.back=function(){
     }
     else{
       console.log("songID- "+ songID);
+      setTimeout(function(){
         SC.stream(songID).then(function(player){
           scPlayer=player;
           scPlayer.play();
         });
-        setTimeout(function(){
-          this.player=scPlayer;
       },1000);
     }
   }
 }
 
 Jukebox.prototype.forth=function(){
-  var scPlayer;
   var currentID=(this.song.className.replace(/song/,""));
   var newID=Number(currentID)+1;
   var end=this.playlist.length;
@@ -268,13 +268,12 @@ Jukebox.prototype.forth=function(){
       this.song.play();
     }
     else{
+      setTimeout(function(){
         SC.stream(songID).then(function(player){
           scPlayer=player;
           scPlayer.play();
         });
-        setTimeout(function(){
-          this.scPlayer=scPlayer;
-        },1000);
+      },1000);
     }
   }
 }

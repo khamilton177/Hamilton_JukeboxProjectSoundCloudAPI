@@ -17,7 +17,7 @@ var playButton = document.querySelector("#play");
 var pauseButton = document.querySelector("#pause");
 var stopButton = document.querySelector("#stop");
 
-// var scPlayer, result;
+var scPlayer, result;
 
 // defines the Jukebox object
 function Jukebox(songs) {
@@ -166,51 +166,64 @@ Jukebox.prototype.onLoad=function(){
 }
 
 // Create reusable function to determine if song is using Audio or Soundcloud
-function choosePlayer(song, action){
-  var currentPlayer, audio;
-  this.song=song;
-  if(this.song.id.includes("song")){
-    console.log("Im at Jukebox player commands");
-    switch(eval(action)) {
-      case play:
-        console.log("At Play");
-        this.song.play();
-        break;
-      case pause:
-        console.log("At Pause");
-        this.song.pause();
-        break;
-      default:
-        console.log("At Default");
-        this.song.pause();
-        this.song.currentTime=0;
-    }
-  }
-  else{
-    console.log("Im at SCplayer commands");
-      switch(eval(action)) {
-        case play:
-          console.log("At Play");
-          this.scPlayer.play();
-          break;
-        case pause:
-          console.log("At Pause");
-          this.scPlayer.pause();
-          break;
-        default:
-          console.log("At Default");
-          this.scPlayer.pause();
-          this.scPlayer.seek(0);
-      }
-  }
-}
+// function choosePlayer(song, action){
+//   var currentPlayer, audio;
+//   this.song=song;
+//   if(this.song.id.includes("song")){
+//     console.log("Im at Jukebox player commands");
+//     switch(eval(action)) {
+//       case play:
+//         console.log("At Play");
+//         this.song.play();
+//         break;
+//       case pause:
+//         console.log("At Pause");
+//         this.song.pause();
+//         break;
+//       default:
+//         console.log("At Default");
+//         this.song.pause();
+//         this.song.currentTime=0;
+//     }
+//   }
+//   else{
+//     console.log("Im at SCplayer commands");
+//     SC.stream(this.song.id).then(function(player){
+//       scPlayer=player;
+//       switch(eval(action)) {
+//         case play:
+//           console.log("At Play");
+//           scPlayer.play();
+//           break;
+//         case pause:
+//           console.log("At Pause");
+//           scPlayer.pause();
+//           break;
+//         default:
+//           console.log("At Default");
+//           scPlayer.pause();
+//           scPlayer.seek(0);
+//       }
+//     });
+//   }
+// }
 
 //defines the Jukebox prototype object
 Jukebox.prototype.play = function(){
   if (this.song!="undefined"){
     var currentID=(this.song.className.replace(/song/,""));
-    var songID=this.playlist[currentID].id;
-    choosePlayer(this.song, "play");
+    if(this.song.id.includes("song")){
+      console.log("Im at Jukebox player commands");
+      console.log("At Play");
+      this.song.play();
+    }
+    else{
+      console.log("Im at SC player commands");
+      SC.stream(this.song.id).then(function(player){
+        scPlayer=player;
+        scPlayer.play();
+      });
+    }
   }
   else{
     var counter=0;
@@ -220,61 +233,102 @@ Jukebox.prototype.play = function(){
 }
 
 Jukebox.prototype.pause = function () {
-  choosePlayer(this.song, "pause");
+  if(this.song.id.includes("song")){
+    console.log("Im at Jukebox player commands");
+    console.log("At Pause");
+    this.song.pause();
+  }
+  else{
+    console.log("Im at SC player commands");
+    SC.stream(this.song.id).then(function(player){
+      scPlayer=player;
+      scPlayer.pause();
+    });
+  }
 }
 
 Jukebox.prototype.stop= function () {
-  choosePlayer(this.song, "stop");
+  // if(this.song.id.includes("song")){
+  //   console.log("Im at Jukebox player commands");
+  //   console.log("At Stop");
+  //   this.song.pause();
+  //   this.song.currentTime=0;
+  // }
+  // else{
+    console.log("Im at SC player commands");
+    SC.stream(this.song.id).then(function(player){
+      scPlayer=player;
+      scPlayer.pause();
+      scPlayer.seek(0);
+    });
+  // }
 }
 
 Jukebox.prototype.back=function(){
-  var scPlayer;
   var currentID=(this.song.className.replace(/song/,""));
   var newID=Number(currentID)-1;
   console.log("song- "+ this.song.id +"\ncurrentID- "+ currentID +"\nnewID- "+ newID +"\nclassID- "+ this.song.className);
   //test that new counter not  negative (before first song).
   if (newID>=0){
-    choosePlayer(this.song, "back");
-    var songID=this.playlist[newID].id;
+    if(this.song.id.includes("tracks")){
+      console.log("Im at SC player commands");
+      SC.stream(this.song.id).then(function(player){
+        scPlayer=player;
+        scPlayer.pause();
+        scPlayer.seek(0);
+      });
+    }
+    else{
+      console.log("Im at Jukebox player commands");
+      console.log("At Stop");
+      this.song.pause();
+      this.song.currentTime=0;
+    }
+    this.song.id=this.playlist[newID].id;
     this.song=this.playlist[newID];
-    if(songID.includes("song")){
+    if(this.song.id.includes("song")){
       this.song.play();
     }
     else{
-      console.log("songID- "+ songID);
-        SC.stream(songID).then(function(player){
-          scPlayer=player;
-          scPlayer.play();
-        });
-        setTimeout(function(){
-          this.player=scPlayer;
-      },1000);
+      SC.stream(this.song.id).then(function(player){
+        scPlayer=player;
+        scPlayer.play();
+      });
     }
   }
 }
 
 Jukebox.prototype.forth=function(){
-  var scPlayer;
   var currentID=(this.song.className.replace(/song/,""));
   var newID=Number(currentID)+1;
   var end=this.playlist.length;
   console.log("song- "+ this.song.id +"\nend- "+ end +"\ncurrentID- "+ currentID +"\nnewID- "+ newID +"\nclassID- "+ this.song.className);
   //test that new counter not past last playlst item.
   if (newID<end){
-    choosePlayer(this.song, "forth");
-    var songID=this.playlist[newID].id;
+    if(this.song.id.includes("tracks")){
+      console.log("Im at SC player commands");
+      SC.stream(this.song.id).then(function(player){
+        scPlayer=player;
+        scPlayer.pause();
+        scPlayer.seek(0);
+      });
+    }
+    else{
+      console.log("Im at Jukebox player commands");
+      console.log("At Stop");
+      this.song.pause();
+      this.song.currentTime=0;
+    }
+    this.song.id=this.playlist[newID].id;
     this.song=this.playlist[newID];
-    if(songID.includes("song")){
+    if(this.song.id.includes("song")){
       this.song.play();
     }
     else{
-        SC.stream(songID).then(function(player){
-          scPlayer=player;
-          scPlayer.play();
-        });
-        setTimeout(function(){
-          this.scPlayer=scPlayer;
-        },1000);
+      SC.stream(this.song.id).then(function(player){
+        scPlayer=player;
+        scPlayer.play();
+      });
     }
   }
 }
