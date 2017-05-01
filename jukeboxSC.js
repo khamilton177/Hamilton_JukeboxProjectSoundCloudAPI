@@ -2,15 +2,15 @@
 SC.initialize({client_id:"fd4e76fc67798bfa742089ed619084a6"});
 
 //  Get elements for dynamic HTML build.
-var box=document.querySelector("#juke");
-var sclist=document.querySelector("ol");
-var art=document.querySelector(".art");
-var scDetails=document.getElementsByClassName(".details");
-var playSC=document.querySelector("a");
-var addFileField=document.querySelector("#addFile");
-var addSCField=document.querySelector("#addSC");
-var fileButton=document.querySelector("#file");
-var scButton=document.querySelector("#sc");
+var box = document.querySelector("#juke");
+var sclist = document.querySelector("ol");
+var art = document.querySelector(".artHide");
+var scDetails = document.getElementsByClassName(".details");
+var playSC = document.querySelector("a");
+var addFileField = document.querySelector("#addFile");
+var addSCField = document.querySelector("#addSC");
+var fileButton = document.querySelector("#file");
+var scButton = document.querySelector("#sc");
 var backButton = document.querySelector("#back");
 var forthButton = document.querySelector("#forth");
 var playButton = document.querySelector("#play");
@@ -26,6 +26,8 @@ function Jukebox(songs) {
   this.playlist=[];
   // scPlayer will be used to initiate calls to the Sound Cloud API
   this.scPlayer;
+  this.currentImg;
+  this.currentEp;
     // Dynamically build html playlist
     for (var counter=0; counter<songs.length; counter++){
       var song="song"+counter;
@@ -45,7 +47,7 @@ function Jukebox(songs) {
 var jukebox = new Jukebox([]);
 
 //  Used to add audio files to playlist
-Jukebox.prototype.Addsongs=function(songs){
+Jukebox.prototype.Addsongs = function(songs){
   this.songs=songs;
   var current=this.playlist.length;
     for (counter=0; counter<songs.length; counter++){
@@ -61,9 +63,11 @@ Jukebox.prototype.Addsongs=function(songs){
       this.playlist.push(e);
       var e=document.createElement("li");
       sclist.appendChild(e);
-      var eA=document.createElement(song);
+      var eA=document.createElement("a");
+      eA.setAttribute("id", song +"A");
       eA.setAttribute("class", song);
       eA.setAttribute("href", "#");
+      eA.addEventListener('click', playFromList);
       eA.innerHTML=eTitle;
       e.appendChild(eA);
     }
@@ -76,7 +80,7 @@ jukebox.Addsongs(["./audio/Always\ In\ My\ Head.m4a",
 "./audio/Doubt.m4a","./audio/You\ and\ Me.m4a"]);
 
 //  Used to add Sound Cloud tracks to playlist
-Jukebox.prototype.addSC=function(scurl){
+Jukebox.prototype.addSC = function(scurl){
 	this.scurl=scurl;
   // Define variables that will be used in Resolve and Get request
   var playlist=this.playlist
@@ -116,14 +120,20 @@ Jukebox.prototype.addSC=function(scurl){
     this.scGenre=scGenre;
     this.scArt=scArt;
   	console.log("Art- "+ this.scArt);
+    var eImg=document.createElement("img");
+    box.appendChild(eImg);
+    eImg.setAttribute("id", this.scID +"Img");
+    eImg.setAttribute("class", "artHide");
+    eImg.setAttribute("src", this.scArt);
     var e=document.createElement("li");
     sclist.appendChild(e);
     var eA=document.createElement("a");
     var scClass="song"+Number(playlist.length);
-    eA.setAttribute("id", this.scID);
+    eA.setAttribute("id", this.scID +"A");
     eA.setAttribute("class", scClass);
-    eA.setAttribute("href", this.scPerm);
+    eA.setAttribute("href", "#");
     eA.innerHTML=this.scTitle;
+    eA.addEventListener('click', playFromList);
     e.appendChild(eA);
     playlist.push(eA);
     var eBtn=document.createElement("Button")
@@ -141,35 +151,91 @@ Jukebox.prototype.addSC=function(scurl){
       "<BR>Release Date- "+ this.scRelease  +
       "<BR>Description- "+ this.scDesc +
       "<BR>Genre- "+ this.scGenre +
+      "<BR>Visit Page- "+ "<a href='"+ this.scPerm +
+      "' target='_blank'>"+ this.scPerm +
+      "</a>"
       "<BR>";
-    e.appendChild(eP);
+    box.appendChild(eP);
 	},3000);
 }
 
 //  Function to attach to dynamically created Event Listener for class- details <p>
-var showScDetails=function(event){
+function showScDetails(){
   event.preventDefault();
 	console.log(event);
+  //  Hide the last displayed details paragraph
+  if (jukebox.currentImg != undefined){
+    jukebox.currentImg.setAttribute("class", "artHide");
+  }
+  if (jukebox.currentEp != undefined){
+    jukebox.currentEp.setAttribute("class", "detailsHide");
+  }
   jukebox.DisplayDetails(event.target.id+"P", event.target.id);
 }
 
+//  Function to attach to dynamically created Event Listener for playlist <a>
+function playFromList(){
+  event.preventDefault();
+  console.log("This is <A> Id- "+ event.target.id + "\nThis <A> class- "+ event.target.className);
+  jukebox.playList(event.target.className);
+}
+
+//  Play song by title from playlist.
+Jukebox.prototype.playList = function(classID){
+  this.classID=classID;
+  var currentID=this.classID.replace(/song/,"");
+  console.log("currentID- "+ currentID);
+  var songID=jukebox.playlist[currentID].id.slice(0,-1);
+  console.log("after slice- "+ songID);
+  if (this.song != undefined){
+    if(this.song.id.includes("song")){
+      this.song.pause();
+      this.song.currentTime=0;
+    }
+  }
+  if(this.scPlayer != undefined){
+    if(this.song.id.includes("song")){
+      this.scPlayer.pause();
+      this.scPlyer.seek(0);
+    }
+  }
+  this.song=jukebox.playlist[currentID];
+  if(songID.includes("song")){
+    this.song.play();
+  }
+  else{
+    var scPlayer;
+    SC.stream(songID).then(function(player){
+      scPlayer=player;
+      scPlayer.play();
+    });
+    setTimeout(function(){
+      this.scPlayer=scPlayer;
+    },1000);
+  }
+  this.song=jukebox.playlist[currentID];
+}
+
 //  Display Sound Cloud details.
-Jukebox.prototype.DisplayDetails=function(paraID, scID){
+Jukebox.prototype.DisplayDetails = function(paraID, scID){
+  eImg=document.getElementById(scID + "Img");
   eP=document.getElementById(paraID);
+  this.currentImg=eImg;
+  this.currentEp=eP;
   console.log("This is eP- "+eP);
   this.scID=scID;
   console.log(this.scID);
-  var scArt;
+  // var scArt;
   SC.get(scID).then(function(response){
     scID="/tracks/"+response.id;
     scPerm=response.permalink_url;
     scArt=response.artwork_url;
+    eImg.setAttribute("class", "artShow");
   })
   setTimeout(function(){
     this.scID=scID;
     console.log("This is eP- "+eP);
-    eP.setAttribute("class", "p.detailsShow");
-    art.setAttribute("src", this.scArt);
+    eP.setAttribute("class", "detailsShow");
   },1000);
 }
 
@@ -177,14 +243,13 @@ Jukebox.prototype.DisplayDetails=function(paraID, scID){
 jukebox.addSC("https://soundcloud.com/kjun/keisha-cole-heaven-sent-k-jun-remix");
 
 //  Load the created sample playlist on page load and play first song.
-Jukebox.prototype.onLoad=function(){
+Jukebox.prototype.onLoad = function(){
   this.song=this.playlist[0];
   this.song.play();
 }
 
 // Create reusable function to determine if song is using Audio or Soundcloud
 function choosePlayer(song, action){
-  var currentPlayer, audio;
   this.song=song;
   if(this.song.id.includes("song")){
     console.log("Im at Jukebox player commands");
@@ -225,7 +290,7 @@ function choosePlayer(song, action){
 Jukebox.prototype.play = function(){
   if (this.song!="undefined"){
     var currentID=(this.song.className.replace(/song/,""));
-    var songID=this.playlist[currentID].id;
+    var songID=this.playlist[currentID].id.slice(0,-1);
     choosePlayer(this.song, "play");
   }
   else{
@@ -235,15 +300,15 @@ Jukebox.prototype.play = function(){
   }
 }
 
-Jukebox.prototype.pause = function () {
+Jukebox.prototype.pause = function(){
   choosePlayer(this.song, "pause");
 }
 
-Jukebox.prototype.stop= function () {
+Jukebox.prototype.stop = function(){
   choosePlayer(this.song, "stop");
 }
 
-Jukebox.prototype.back=function(){
+Jukebox.prototype.back = function(){
   var scPlayer;
   var currentID=(this.song.className.replace(/song/,""));
   var newID=Number(currentID)-1;
@@ -251,7 +316,7 @@ Jukebox.prototype.back=function(){
   //  test that new counter not  negative (before first song).
   if (newID>=0){
     choosePlayer(this.song, "back");
-    var songID=this.playlist[newID].id;
+    var songID=this.playlist[newID].id.slice(0,-1);
     this.song=this.playlist[newID];
     if(songID.includes("song")){
       this.song.play();
@@ -263,13 +328,13 @@ Jukebox.prototype.back=function(){
           scPlayer.play();
         });
         setTimeout(function(){
-          this.player=scPlayer;
+          this.scPlayer=scPlayer;
       },1000);
     }
   }
 }
 
-Jukebox.prototype.forth=function(){
+Jukebox.prototype.forth = function(){
   var scPlayer;
   var currentID=(this.song.className.replace(/song/,""));
   var newID=Number(currentID)+1;
@@ -278,7 +343,7 @@ Jukebox.prototype.forth=function(){
   //  test that new counter not past last playlst item.
   if (newID<end){
     choosePlayer(this.song, "forth");
-    var songID=this.playlist[newID].id;
+    var songID=this.playlist[newID].id.slice(0,-1);
     this.song=this.playlist[newID];
     if(songID.includes("song")){
       this.song.play();

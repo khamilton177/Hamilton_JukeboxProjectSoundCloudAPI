@@ -18,7 +18,7 @@ body{
 }
 
 #juke{
-  position:absolute;
+  position:fixed;
   width: 300px;
   height: 350px;
   bottom: 20%;
@@ -35,8 +35,12 @@ body{
 }
 
 #jukeNav{
-  position:relative;
-  padding-top: 15px;
+  /*position:relative;
+  padding-top: 15px;*/
+  position: fixed;
+    width: 100%;
+    bottom: 0%;
+    height: 120px;
 }
 
 .inputHolder{
@@ -74,34 +78,50 @@ li{
   color: gainsboro;
 }
 
-.art{
-  position:relative;
+.artHide{
+  position:fixed;
   width: 300px;
   height: 350px;
   display: inline-block;
-  background-size: cover;
-}
-
-p.detailsHide{
-  display: inline-flex;
   opacity: 0;
-  width: 250px;
-  height: auto;
-  margin: 0;
-  text-decoration: underline;
 }
 
-p, p.detailsShow{
-  display: inline-flex;
-  opacity: 1;
+.artShow{
+  position:fixed;
   width: 300px;
-  height: auto;
+  height: 350px;
+  display: inline-block;
+  opacity: 1;
+}
+
+.detailsHide{
+  display: inline-block;
+  position: fixed;
+  bottom: 20%;
+  left: 65%;
+  width: 300px;
+  height: 350px;
+  opacity: 0;
   margin: 0;
-  margin-left: 6%;
+  margin-left: 5px;
+  z-index: 1;
+}
+
+.detailsShow{
+  display: inline-block;
+  position: fixed;
+  bottom: 20%;
+  left: 65%;
+  width: 300px;
+  height: 350px;
+  opacity: 1;
+  margin: 0;
+  margin-left: 5px;
   background: transparent;
   border-color: none;
   color: white;
   font-size: 18px;
+  z-index: 999;
 }
 
 .details{
