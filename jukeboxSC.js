@@ -1,5 +1,5 @@
 //  Add Sound Cloud api
-SC.initialize({client_id:"fd4e76fc67798bfa742089ed619084a6"});
+SC.initialize({client_id:client_key});
 
 //  Get elements for dynamic HTML build.
 var box = document.querySelector("#juke");
